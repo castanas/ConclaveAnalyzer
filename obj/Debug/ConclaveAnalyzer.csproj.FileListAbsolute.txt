@@ -1,0 +1,7 @@
+D:\Visual\AnotherTestProject\bin\Debug\AnotherTestProject.exe.config
+D:\Visual\AnotherTestProject\bin\Debug\AnotherTestProject.exe
+D:\Visual\AnotherTestProject\bin\Debug\AnotherTestProject.pdb
+D:\Visual\AnotherTestProject\obj\Debug\ConclaveAnalyzer.csprojAssemblyReference.cache
+D:\Visual\AnotherTestProject\obj\Debug\ConclaveAnalyzer.csproj.CoreCompileInputs.cache
+D:\Visual\AnotherTestProject\obj\Debug\AnotherTestProject.exe
+D:\Visual\AnotherTestProject\obj\Debug\AnotherTestProject.pdb

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics.Eventing.Reader;
+using AnotherTestProject;
 
 namespace ConclaveAnalyzer
 {
@@ -13,10 +15,13 @@ namespace ConclaveAnalyzer
         {
             Console.WriteLine("Drag and Drop EE.log into a console then press Enter.");
 
-            //Lists
+            //Variables
 
             List<Player> players = new List<Player>();
+            List<Map> maps = new List<Map>();
             List<string> usernames = new List<string>();
+            List<string> mapNames = new List<string>();
+            int maxRounds = 0;
 
             //Getting text from EE.log
 
@@ -24,9 +29,10 @@ namespace ConclaveAnalyzer
             string log = stream.ReadToEnd();
             stream.Close();
 
-            //Finding all the playernames in EE.log, adding Players
+            //Analyzing log
             string localPlayer = null;
             string[] logText = log.Split(':');
+            Console.WriteLine();
             foreach (string line in logText)
             {
                 if (line.Contains("- new avatar"))
@@ -42,9 +48,29 @@ namespace ConclaveAnalyzer
                 {
                     localPlayer = line.Substring(11).Substring(0, line.Substring(11).IndexOf('(')).Replace(" ", "");
                 }
-            }
 
-            Console.WriteLine();
+                if (line.Contains("SetLevel") 
+                    &&
+                    line.Contains("PVP"))
+                {
+                    if (!mapNames.Contains(line.Substring(9)
+                        .Remove(line.Substring(9)
+                        .IndexOf('\n'))
+                        .Replace("/Lotus/Levels/PVP/", "")
+                        .Replace("\r", "")))
+                    {
+                        maps.Add(new Map(line.Substring(9)
+                            .Remove(line.Substring(9)
+                            .IndexOf('\n'))
+                            .Replace("/Lotus/Levels/PVP/", "")
+                            .Replace("\r", "")));
+                    }
+                    mapNames.Add(line.Substring(9)
+                        .Remove(line.Substring(9).IndexOf('\n'))
+                        .Replace("/Lotus/Levels/PVP/", "")
+                        .Replace("\r",""));
+                }
+            }
 
             //Counting Kills, Deaths, and K/D Ratio
 
@@ -68,20 +94,50 @@ namespace ConclaveAnalyzer
                 }
             }
 
+            //Collecting stats for every map
+
+            foreach (Map map in maps)
+            {
+                foreach (string line in mapNames)
+                {
+                    if (map.logName == line)
+                    {
+                        map.roundsPlayed++;
+                    }
+                }
+                if (map.roundsPlayed > maxRounds) { maxRounds = map.roundsPlayed; }
+            }
+
             //Output
 
-            Console.WriteLine("Session stats: \n");
+            Console.WriteLine("Session stats: \nPlayers stats:\n");
             foreach (Player player in players)
             {
                 if (player.username == localPlayer)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine(player.GetStats()+" (You)\n");
+                    Console.Write(player.GetStats()+" (You)\n");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine(player.GetStats()+"\n");
+                    Console.Write(player.GetStats()+"\n");
+                }
+            }
+            Console.WriteLine("\nMaps: \n");
+            foreach (Map map in maps)
+            {
+                if (map.roundsPlayed == maxRounds)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write(map.GetStats() + " (Most Played)\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write(map.GetStats() + "\n");
                 }
             }
             Console.ReadKey();
