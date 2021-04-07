@@ -12,8 +12,6 @@ namespace AnotherTestProject
         public string map;
         public string logName;
         public int roundsPlayed = 0;
-        bool mostPlayed = false;
-
         public Map() { }
 
         //In this constructor program detects which map stands for presented logName
@@ -35,6 +33,9 @@ namespace AnotherTestProject
                 case "GrineerSettlementDuel01.level": map = "Canyon Settlement"; break;
                 case "DMCephalon.level": map = "Cephalon Citadel"; break;
                 case "DMCrpCore.level": map = "Core"; break;
+                case "DMFort.level": map = "Bunkers"; break;
+                case "DMCorpusShip.level": map = "Freight Line"; break;
+                case "CTFInfestedCorpus.level": map = "Infested Frigate"; break;
                 default: map = "null"; break;
             }
         }

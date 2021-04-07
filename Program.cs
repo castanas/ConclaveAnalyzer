@@ -13,6 +13,7 @@ namespace ConclaveAnalyzer
     {
         static void Main(string[] args)
         {
+            Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Drag and Drop EE.log into a console then press Enter.");
 
             //Variables
@@ -22,6 +23,7 @@ namespace ConclaveAnalyzer
             List<string> usernames = new List<string>();
             List<string> mapNames = new List<string>();
             int maxRounds = 0;
+            float sessionTime = 0;
 
             //Getting text from EE.log
 
@@ -30,14 +32,29 @@ namespace ConclaveAnalyzer
             stream.Close();
 
             //Analyzing log
+
             string localPlayer = null;
             string[] logText = log.Split(':');
             Console.WriteLine();
+
+            //Finding Session Time
+
+            sessionTime = float.Parse(logText[logText.Length - 4]
+                .Substring(0, logText[logText.Length - 4]
+                .IndexOf('S')-1)
+                .Replace(" All smart pointers were destroyed!", ""));
+            sessionTime = sessionTime / 3600.0f;
+
+            //General analysis
+
             foreach (string line in logText)
             {
                 if (line.Contains("- new avatar"))
                 {
-                    if (!usernames.Contains(line.Replace(" - new avatar", "")) && line.Replace(" - new avatar", "") != " Player" )
+                    if (!usernames.Contains(line.Replace(" - new avatar", "")) 
+                        && 
+                        line.Replace(" - new avatar", "") 
+                        != " Player" )
                     {
                         usernames.Add(line.Replace(" - new avatar", ""));
                         players.Add(new Player(line.Replace(" - new avatar", "").Replace(" ","")));
@@ -110,7 +127,12 @@ namespace ConclaveAnalyzer
 
             //Output
 
-            Console.WriteLine("Session stats: \nPlayers stats:\n");
+            Console.Write("\t\t\t\t\t[Session stats]\n\n\t\tSession time: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write((float)Math.Round(sessionTime, 2)
+                + "hrs");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(".\n\n\t\t\t\t\t[Players stats]\n");
             foreach (Player player in players)
             {
                 if (player.username == localPlayer)
@@ -125,7 +147,7 @@ namespace ConclaveAnalyzer
                     Console.Write(player.GetStats()+"\n");
                 }
             }
-            Console.WriteLine("\nMaps: \n");
+            Console.WriteLine("\n\t\t\t\t\t\t[Maps]\n");
             foreach (Map map in maps)
             {
                 if (map.roundsPlayed == maxRounds)
