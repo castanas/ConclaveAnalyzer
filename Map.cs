@@ -9,6 +9,7 @@ namespace AnotherTestProject
     class Map
     {
         //Map variables
+        public static int maxRounds = 0;
         public string map;
         public string logName;
         public int roundsPlayed = 0;
@@ -45,6 +46,43 @@ namespace AnotherTestProject
         public string GetStats()
         {
             return map + ": " + roundsPlayed + " times";
+        }
+
+        //Gets map from a log line
+        public static void GetMapFromLine(string line, List<string> mapNames, List<Map> maps)
+        {
+            if (!mapNames.Contains(line.Substring(9)
+                 .Remove(line.Substring(9)
+                 .IndexOf('\n'))
+                 .Replace("/Lotus/Levels/PVP/", "")
+                 .Replace("\r", "")))
+            {
+                maps.Add(new Map(line.Substring(9)
+                    .Remove(line.Substring(9)
+                    .IndexOf('\n'))
+                    .Replace("/Lotus/Levels/PVP/", "")
+                    .Replace("\r", "")));
+            }
+            mapNames.Add(line.Substring(9)
+                .Remove(line.Substring(9).IndexOf('\n'))
+                .Replace("/Lotus/Levels/PVP/", "")
+                .Replace("\r", ""));
+        }
+
+        //Writes all map stats into console
+        public void WriteStats()
+        {
+            if (roundsPlayed == maxRounds)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(GetStats() + " (Most Played)\n");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write(GetStats() + "\n");
+            }
         }
     }
 }

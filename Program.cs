@@ -22,7 +22,6 @@ namespace ConclaveAnalyzer
             List<Map> maps = new List<Map>();
             List<string> usernames = new List<string>();
             List<string> mapNames = new List<string>();
-            int maxRounds = 0;
             float sessionTime = 0;
 
             //Getting text from EE.log
@@ -33,7 +32,6 @@ namespace ConclaveAnalyzer
 
             //Analyzing log
 
-            string localPlayer = null;
             string[] logText = log.Split(':');
             Console.WriteLine();
 
@@ -51,44 +49,18 @@ namespace ConclaveAnalyzer
             {
                 if (line.Contains("- new avatar"))
                 {
-                    if (!usernames.Contains(line.Replace(" - new avatar", "")) 
-                        && 
-                        line.Replace(" - new avatar", "") 
-                        != " Player" )
-                    {
-                        usernames.Add(line.Replace(" - new avatar", ""));
-                        players.Add(new Player(line.Replace(" - new avatar", "").Replace(" ","")));
-                    }
+                    Player.GetPlayerFromLine(line, usernames, players);
                 }
 
-                if (line.Contains("Logged in"))
-                {
-                    localPlayer = line.Substring(11).Substring(0, line.Substring(11).IndexOf('(')).Replace(" ", "");
-                }
+                Player.SetLocalPlayer(line);
 
-                if (line.Contains("SetLevel") 
-                    &&
-                    line.Contains("PVP"))
+                if (line.Contains("SetLevel")
+                &&
+                line.Contains("PVP"))
                 {
-                    if (!mapNames.Contains(line.Substring(9)
-                        .Remove(line.Substring(9)
-                        .IndexOf('\n'))
-                        .Replace("/Lotus/Levels/PVP/", "")
-                        .Replace("\r", "")))
-                    {
-                        maps.Add(new Map(line.Substring(9)
-                            .Remove(line.Substring(9)
-                            .IndexOf('\n'))
-                            .Replace("/Lotus/Levels/PVP/", "")
-                            .Replace("\r", "")));
-                    }
-                    mapNames.Add(line.Substring(9)
-                        .Remove(line.Substring(9).IndexOf('\n'))
-                        .Replace("/Lotus/Levels/PVP/", "")
-                        .Replace("\r",""));
+                    Map.GetMapFromLine(line, mapNames, maps);
                 }
             }
-
             //Counting Kills, Deaths, and K/D Ratio
 
             foreach (Player player in players)
@@ -97,16 +69,7 @@ namespace ConclaveAnalyzer
                 {
                     if (line.Contains(player.username) && line.Contains("was killed by"))
                     {
-                        if (line.IndexOf(player.username) < line.IndexOf("was killed by"))
-                        {
-                            player.AddDeath();
-                            player.CountKDRatio();
-                        }
-                        if (line.IndexOf(player.username) > line.IndexOf("was killed by"))
-                        {
-                            player.AddKill();
-                            player.CountKDRatio();
-                        }
+                        Player.GetKillDeath(line, player);
                     }
                 }
             }
@@ -122,7 +85,7 @@ namespace ConclaveAnalyzer
                         map.roundsPlayed++;
                     }
                 }
-                if (map.roundsPlayed > maxRounds) { maxRounds = map.roundsPlayed; }
+                if (map.roundsPlayed > Map.maxRounds) { Map.maxRounds = map.roundsPlayed; }
             }
 
             //Output
@@ -133,34 +96,17 @@ namespace ConclaveAnalyzer
                 + "hrs");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(".\n\n\t\t\t\t\t[Players stats]\n");
+
             foreach (Player player in players)
             {
-                if (player.username == localPlayer)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write(player.GetStats()+" (You)\n");
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write(player.GetStats()+"\n");
-                }
+                player.WriteStats();
             }
+
             Console.WriteLine("\n\t\t\t\t\t\t[Maps]\n");
+
             foreach (Map map in maps)
             {
-                if (map.roundsPlayed == maxRounds)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write(map.GetStats() + " (Most Played)\n");
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write(map.GetStats() + "\n");
-                }
+                map.WriteStats();
             }
             Console.ReadKey();
         }
